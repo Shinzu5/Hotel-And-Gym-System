@@ -8,11 +8,15 @@
  * actionable.
  */
 
+import { getApiUrl } from "@/lib/api";
+
 export default function AppError({ error, reset }) {
   const message =
     (typeof error?.message === "string" && error.message) ||
     "Something went wrong while rendering this page.";
   const digest = error?.digest ? String(error.digest) : null;
+  // The API the app is actually calling - so the hint below is never a guess.
+  const apiUrl = getApiUrl().replace(/\/api\/?$/, "");
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
@@ -68,7 +72,7 @@ export default function AppError({ error, reset }) {
 
         <p className="mt-6 border-t border-gray-100 pt-4 text-xs text-gray-500">
           Still stuck? Sign out and back in, or check that the backend is running on
-          <span className="font-mono"> http://localhost:5000</span>.
+          <span className="font-mono"> {apiUrl}</span>.
         </p>
       </div>
     </div>
