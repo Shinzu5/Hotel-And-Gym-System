@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Secrets — never commit the real env files
+.env
+.env.local
+.env*.local
+
+# UI test screenshots
+.ui-check/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Stray scratch script (counts DB rows; the require path is relative to backend/)
+tmp-f.js

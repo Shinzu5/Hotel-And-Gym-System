@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+}
+
+model MembershipPlan {
+  id           String    @id @default(cuid())
+  name         String
+  price        Decimal   @db.Decimal(10, 2)
+  durationDays Int
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  members      Member[]
+  payments     Payment[]
+}
+
+model Member {
+  id        String         @id @default(cuid())
+  fullName  String
+  email     String?        @unique
+  phone     String?
+  planId    String
+  plan      MembershipPlan @relation(fields: [planId], references: [id])
+  startDate DateTime
+  endDate   DateTime
+  status    String
+  createdAt DateTime       @default(now())
+  payments  Payment[]
+}
+
+model Payment {
+  id        String         @id @default(cuid())
+  memberId  String?
+  member    Member?        @relation(fields: [memberId], references: [id])
+  planId    String?
+  plan      MembershipPlan? @relation(fields: [planId], references: [id])
+  amount    Decimal        @db.Decimal(10, 2)
+  status    String
+  method    String?
+  itemName  String?
+  notes     String?
+  reportId  String?
+  report    DailyReport?   @relation(fields: [reportId], references: [id])
+  paidAt    DateTime       @default(now())
+}
+
+model DailyReport {
+  id               String    @id @default(cuid())
+  date             DateTime  @unique
+  totalSales       Decimal   @db.Decimal(10, 2)
+  transactionCount Int
+  closedAt         DateTime  @default(now())
+  payments         Payment[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  body      String?
+  kind      String   @default("info")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  detail    String?
+  createdAt DateTime @default(now())
+}
+
+// ----------------------------- Abbey Residences ----------------------------
+
+// One physical room/apartment. `code` is the card heading ("ROOM 1") and
+// `name` is how the unit is referenced everywhere else ("Unit 1A").
+model ApartmentUnit {
+  id          String   @id @default(cuid())
+  code        String
+  name        String
+  type        String // "Studio" | "1 Bedroom" | "2 Bedroom"
+  monthlyRent Decimal  @db.Decimal(10, 2)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  leases      Lease[]
+}
+
+/// A rental tenancy on a unit. Only one lease is ACTIVE at a time.
+model Lease {
+  id          String         @id @default(cuid())
+  unitId      String
+  unit        ApartmentUnit  @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  renterName  String
+  contact     String?
+  startDate   DateTime
+  endDate     DateTime
+  monthlyRent Decimal        @db.Decimal(10, 2)
+  status      String         @default("ACTIVE") // ACTIVE | ENDED
+  endedAt     DateTime?
+  endedReason String?
+  createdAt   DateTime       @default(now())
+  payments    LeasePayment[]
+}
+
+/// Rent received against a lease. Deliberately separate from the gym's
+/// `Payment` table so rental income never leaks into the gym KPIs.
+model LeasePayment {
+  id      String   @id @default(cuid())
+  leaseId String
+  lease   Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  amount  Decimal  @db.Decimal(10, 2)
+  method  String?
+  notes   String?
+  paidAt  DateTime @default(now())
+}
