@@ -6,15 +6,23 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const { initRealtime } = require('./realtime')
+const { allowedOrigins } = require('./lib/allowedOrigins')
 
 const app = express()
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: allowedOrigins(),
   credentials: true,
 }))
 
 app.use(express.json())
+
+// Liveness probe for the host (Render). Deliberately unauthenticated and
+// dependency-free: it must answer 200 before anyone has a token, and it must
+// not fail just because the database is slow.
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'hotel-gym-backend', uptime: Math.round(process.uptime()) })
+})
 
 // Routes
 app.use('/api/auth', require('./routes/auth'))

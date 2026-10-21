@@ -1,0 +1,37 @@
+# Render blueprint — the backend as a Node web service.
+#
+# Create it from Render: New -> Blueprint -> pick this repository. The values
+# below pre-fill the form; only the three marked `sync: false` have to be
+# typed in by hand.
+#
+# Manual setup (if you are on the "New Web Service" form instead):
+#   Root Directory    backend
+#   Build Command     npm install && npx prisma generate && npx prisma migrate deploy
+#   Start Command     npm start
+#   Health Check Path /health
+
+services:
+  - type: web
+    name: hotel-gym-backend
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Pin Node so a future Render default cannot break Prisma 5.
+      - key: NODE_VERSION
+        value: "22"
+      # The Neon connection string (from the Neon console).
+      - key: DATABASE_URL
+        sync: false
+      # Render generates a random secret for you.
+      - key: JWT_SECRET
+        sync: false
+        generateValue: true
+      # The frontend's origin(s), comma-separated. Localhost by default.
+      - key: CORS_ORIGIN
+        sync: false

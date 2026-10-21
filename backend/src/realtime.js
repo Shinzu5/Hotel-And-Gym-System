@@ -13,13 +13,15 @@
 
 const { Server } = require('socket.io')
 const jwt = require('jsonwebtoken')
+const { allowedOrigins } = require('./lib/allowedOrigins')
 
 let io = null
 
 function initRealtime(server) {
   io = new Server(server, {
     cors: {
-      origin: 'http://localhost:3000',
+      // The same allowlist the REST layer uses (CORS_ORIGIN).
+      origin: allowedOrigins(),
       credentials: true,
     },
     // pingInterval/pingTimeout are socket.io's defaults (25s / 20s) — kept
