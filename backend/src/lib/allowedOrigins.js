@@ -1,24 +1,27 @@
 // The browser origins allowed to talk to this API.
 //
-// Local development talks to the Next.js dev server on :3000, so that is the
-// default. A deployment sets CORS_ORIGIN to a comma-separated list of the
-// frontend's origins, e.g.
+// Local development talks to the Next.js dev server on :3000. The deployed
+// frontend is allowed too, so a fresh deployment works the moment the service
+// is running - no dashboard setup. CORS_ORIGIN overrides the list entirely
+// when it is set.
 //
-//   CORS_ORIGIN=https://my-app.vercel.app,https://*.vercel.app
-//
-// A pattern may contain a single "*" (https://*.vercel.app) so that Vercel
-// preview deployments - which get a random subdomain - keep working without
-// an env edit per deploy. "*" on its own allows every origin.
+// A pattern may contain a single "*" (https://hotel-and-gym-system-*.vercel.app)
+// so that Vercel preview deployments - which get a random subdomain - keep
+// working without an env edit per deploy. "*" on its own allows every origin.
 //
 // Both the REST layer (src/index.js) and the Socket.IO layer (src/realtime.js)
 // read it, so the two can never disagree about who is allowed in.
 
-const DEFAULT_ORIGIN = 'http://localhost:3000'
+const DEFAULT_ORIGINS = [
+  'http://localhost:3000',
+  'https://hotel-and-gym-system.vercel.app',
+  'https://hotel-and-gym-system-*.vercel.app',
+]
 
 /** The allowed origins, as an array (or the string "*"). */
 function allowedOrigins() {
-  const configured = process.env.CORS_ORIGIN || DEFAULT_ORIGIN
-  const list = configured
+  const configured = process.env.CORS_ORIGIN
+  const list = (configured || DEFAULT_ORIGINS.join(','))
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean)
@@ -94,5 +97,5 @@ module.exports = {
   originAllowed,
   corsMatchers,
   corsOptions,
-  DEFAULT_ORIGIN,
+  DEFAULT_ORIGINS,
 }
