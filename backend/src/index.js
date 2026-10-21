@@ -6,14 +6,11 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const { initRealtime } = require('./realtime')
-const { allowedOrigins } = require('./lib/allowedOrigins')
+const { corsOptions } = require('./lib/allowedOrigins')
 
 const app = express()
 
-app.use(cors({
-  origin: allowedOrigins(),
-  credentials: true,
-}))
+app.use(cors(corsOptions()))
 
 app.use(express.json())
 

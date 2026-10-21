@@ -8,12 +8,16 @@
  *   events out to every subscriber.
  *
  * Server origin: the API url without the `/api` suffix
- * (NEXT_PUBLIC_API_URL, e.g. http://localhost:5000/api -> http://localhost:5000).
+ * (e.g. https://abbey-backend.onrender.com/api -> https://abbey-backend.onrender.com).
  */
 import { io } from "socket.io-client";
-import { API_URL, getToken } from "./api";
+import { getApiUrl, getToken } from "./api";
 
-const BASE_URL = API_URL.replace(/\/api\/?$/, "");
+/**
+ * Resolved at connect time (not at import time) so the socket always talks to
+ * the same host the REST calls use.
+ */
+const socketBaseUrl = () => getApiUrl().replace(/\/api\/?$/, "");
 
 /** Server events we forward to local subscribers. */
 const SERVER_EVENTS = [
@@ -80,7 +84,7 @@ export function connectSocket() {
   }
 
   socketToken = token;
-  socket = io(BASE_URL, {
+  socket = io(socketBaseUrl(), {
     auth: { token },
     reconnection: true,
     reconnectionAttempts: Infinity,

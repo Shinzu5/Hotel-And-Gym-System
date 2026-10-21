@@ -32,6 +32,7 @@ services:
       - key: JWT_SECRET
         sync: false
         generateValue: true
-      # The frontend's origin(s), comma-separated. Localhost by default.
+      # The frontend's origin(s), comma-separated. "*" inside an entry is a
+      # wildcard, so https://*.vercel.app also covers the preview deploys.
       - key: CORS_ORIGIN
-        sync: false
+        value: "https://hotel-and-gym-system.vercel.app,https://*.vercel.app"

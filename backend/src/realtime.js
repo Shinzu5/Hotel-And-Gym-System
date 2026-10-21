@@ -13,17 +13,14 @@
 
 const { Server } = require('socket.io')
 const jwt = require('jsonwebtoken')
-const { allowedOrigins } = require('./lib/allowedOrigins')
+const { corsOptions } = require('./lib/allowedOrigins')
 
 let io = null
 
 function initRealtime(server) {
   io = new Server(server, {
-    cors: {
-      // The same allowlist the REST layer uses (CORS_ORIGIN).
-      origin: allowedOrigins(),
-      credentials: true,
-    },
+    // The same allowlist the REST layer uses (CORS_ORIGIN).
+    cors: corsOptions(),
     // pingInterval/pingTimeout are socket.io's defaults (25s / 20s) — kept
     // explicitly so the heartbeat behaviour is documented.
     pingInterval: 25000,
