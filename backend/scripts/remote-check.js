@@ -15,7 +15,7 @@
 //   API_URL     the API origin      (default https://abbey-backend.onrender.com)
 //   APP_URL     the frontend origin (default https://hotel-and-gym-system.vercel.app)
 
-const API = (process.env.API_URL || 'https://abbey-backend.onrender.com').replace(/\/+$/, '')
+const API = (process.env.API_URL || 'https://hotel-and-gym-system.onrender.com').replace(/\/+$/, '')
 const APP = (process.env.APP_URL || 'https://hotel-and-gym-system.vercel.app').replace(/\/+$/, '')
 
 const results = []

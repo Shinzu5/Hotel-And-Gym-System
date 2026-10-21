@@ -9,7 +9,7 @@
 //   3. The built-in default below - the last resort, so the app still points
 //      somewhere sensible if the config file is missing.
 const CONFIGURED_API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-const FALLBACK_API_URL = "https://abbey-backend.onrender.com/api";
+const FALLBACK_API_URL = "https://hotel-and-gym-system.onrender.com/api";
 
 const TOKEN_KEY = "token";
 

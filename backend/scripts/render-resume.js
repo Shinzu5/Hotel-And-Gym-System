@@ -108,18 +108,26 @@ async function render(path, { method = 'GET', body } = {}) {
   return data
 }
 
-/** The name a service is listed under (web services nest it). */
-const serviceName = (s) => (s && (s.name || (s.service && s.service.name))) || '?'
+/**
+ * The list endpoint nests the service under `service`, so the id, the name
+ * and the public URL all live one level down.
+ */
+const serviceId = (x) => (x && (x.id || (x.service && x.service.id))) || ''
+const serviceName = (x) => (x && (x.name || (x.service && x.service.name))) || '?'
+const serviceUrl = (x) => {
+  const details = x && x.service && x.service.serviceDetails
+  return (details && details.url) || ''
+}
 
 async function findService() {
-  const wanted = (process.env.RENDER_SERVICE || 'abbey|backend|hotel|gym').toLowerCase()
+  const wanted = (process.env.RENDER_SERVICE || 'hotel|gym|backend|abbey|abbsey').toLowerCase()
   const services = await render('/services?limit=100')
   const list = Array.isArray(services) ? services : []
-  const match = list.find((s) => {
-    const name = serviceName(s).toLowerCase()
-    return new RegExp(wanted).test(name)
-  })
-  return { service: match || null, all: list.map((s) => ({ id: s.id, name: serviceName(s) })) }
+  const match = list.find((s) => new RegExp(wanted).test(serviceName(s).toLowerCase()))
+  return {
+    service: match || null,
+    all: list.map((s) => ({ id: serviceId(s), name: serviceName(s), url: serviceUrl(s) })),
+  }
 }
 
 async function main() {
@@ -134,9 +142,9 @@ async function main() {
     console.error('\nSet RENDER_SERVICE=<name> and run it again.')
     process.exit(1)
   }
-  const id = service.id
+  const id = serviceId(service)
   log(`Found: ${serviceName(service)} (${id})`)
-  log(`  type=${service.type} branch=${(service.service && service.service.branch) || '?'} autoDeploy=${(service.service && service.service.autoDeployTrigger) || '?'}`)
+  log(`  url=${serviceUrl(service)} branch=${(service.service && service.service.branch) || '?'} autoDeploy=${(service.service && service.service.autoDeployTrigger) || '?'} suspended=${(service.service && service.service.suspended) || '?'}`)
 
   /* ------------------------------ 2. resume it ----------------------------- */
   step('Resuming the service')
@@ -166,7 +174,7 @@ async function main() {
 
   /* -------------------------- 4. wait for it to serve ---------------------- */
   step('Waiting for the API to answer')
-  const apiHost = `https://${service.service && service.service.name ? service.service.name : serviceName(service)}.onrender.com`
+  const apiHost = (serviceUrl(service) || `https://${serviceName(service)}.onrender.com`).replace(/\/+$/, '')
   let health = null
   for (let i = 0; i < 40; i++) {
     try {
